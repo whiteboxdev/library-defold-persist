@@ -30,37 +30,35 @@
 
 local persist = {}
 
+-- Map file names to file paths to avoid redundantly constructing the same paths over and over.
+-- { <file_name> = <file_path>, ... }
+local file_paths = {}
+
+-- Map file names to unsaved data fields.
+-- Upon saving a file, each unsaved field will replace its corresponding saved field.
+-- { <file_name> = { <key> = <value>, ... }, ... }
 local unsaved_data = {}
 
 --------------------------------------------------------------------------------
 -- Local Functions
 --------------------------------------------------------------------------------
 
--- Gets the absolute path of a file in the OS's standard location for save files.
--- Does not check if the file actually exists.
--- Returns a string.
-local function get_file_path(file_name)
-	local application_title = sys.get_config_string("project.title")
-	return sys.get_save_file(application_title, file_name)
-end
-
--- Checks if a file exists.
--- Returns true or false.
-local function check_file_exists(file_name)
-	local file_path = get_file_path(file_name)
-	return sys.exists(file_path)
+-- Sets the absolute path of a file in the OS's standard location for save files.
+-- Does not check if the file exists.
+-- Returns nil.
+local function set_file_path(file_name)
+	local project_title = sys.get_config_string("project.title")
+	file_paths[file_name] = sys.get_save_file(project_title, file_name)
 end
 
 -- Saves data that was written to a file.
--- Does not check if the file actually exists.
+-- Does not check if the file exists.
 -- Returns nil.
 local function save(file_name, data)
-	local file_path = get_file_path(file_name)
-	if sys.save(file_path, data) then
+	if sys.save(file_paths[file_name], data) then
 		unsaved_data[file_name] = nil
 	else
 		print("Defold Persist: save() -> Failed to save data: " .. file_path)
-		print("                See the following documentation: https://defold.com/ref/sys/#sys.save:filename-table")
 	end
 end
 
@@ -72,21 +70,23 @@ end
 -- If the file already exists, then its data can be overwritten.
 -- Returns nil.
 function persist.create(file_name, data, overwrite)
-	if not check_file_exists(file_name) or overwrite then
+	if not file_paths[file_name] then
+		set_file_path(file_name)
+	end
+	if not sys.exists(file_paths[file_name]) or overwrite then
 		unsaved_data[file_name] = data
 		save(file_name, data)
-	else
-		local file_path = get_file_path(file_name)
-		print("Defold Persist: persist.create() -> File already exists: " .. file_path)
 	end
 end
 
 -- Writes data to a file.
 -- Returns nil.
 function persist.write(file_name, key, value)
-	if not check_file_exists(file_name) then
-		local file_path = get_file_path(file_name)
-		print("Defold Persist: persist.write() -> File does not exist: " .. file_path)
+	if not file_paths[file_name] then
+		set_file_path(file_name)
+	end
+	if not sys.exists(file_paths[file_name]) then
+		print("Defold Persist: persist.write() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
 	if not unsaved_data[file_name] then
@@ -99,9 +99,11 @@ end
 -- If a key is specified, then only that field is flushed.
 -- Returns nil.
 function persist.flush(file_name, key)
-	if not check_file_exists(file_name) then
-		local file_path = get_file_path(file_name)
-		print("Defold Persist: persist.flush() -> File does not exist: " .. file_path)
+	if not file_paths[file_name] then
+		set_file_path(file_name)
+	end
+	if not sys.exists(file_paths[file_name]) then
+		print("Defold Persist: persist.flush() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
 	if unsaved_data[file_name] then
@@ -116,9 +118,11 @@ end
 -- Saves data that was written to a file.
 -- Returns nil.
 function persist.save(file_name)
-	if not check_file_exists(file_name) then
-		local file_path = get_file_path(file_name)
-		print("Defold Persist: persist.save() -> File does not exist: " .. file_path)
+	if not file_paths[file_name] then
+		set_file_path(file_name)
+	end
+	if not sys.exists(file_paths[file_name]) then
+		print("Defold Persist: persist.save() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
 	local data = persist.load(file_name)
@@ -128,17 +132,19 @@ end
 -- Loads data from a file, including data that has not yet been saved.
 -- Returns a table, or nil if the file does not exist.
 function persist.load(file_name)
-	local file_path = get_file_path(file_name)
-	if not check_file_exists(file_name) then
-		print("Defold Persist: persist.load() -> File does not exist: " .. file_path)
+	if not file_paths[file_name] then
+		set_file_path(file_name)
+	end
+	if not sys.exists(file_paths[file_name]) then
+		print("Defold Persist: persist.load() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
-	local loaded_data = sys.load(file_path) or {}
+	local saved_data = sys.load(file_paths[file_name]) or {}
 	local unsaved_data = unsaved_data[file_name] or {}
 	for key, value in pairs(unsaved_data) do
-		loaded_data[key] = value
+		saved_data[key] = value
 	end
-	return loaded_data
+	return saved_data
 end
 
 return persist

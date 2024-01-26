@@ -29,7 +29,7 @@ local default_settings_data =
 persist.create("settings", default_settings_data)
 ```
 
-If the settings file already existed, then the call to `persist.create()` would simply be ignored. This function should be called as part of a project's startup routine for each save file in order to ensure that they exist.
+If the settings file already existed, then the call to `persist.create()` would simply be ignored. This function should be called as part of a project's startup routine for each save file to ensure that they exist.
 
 Persist only concerns itself with save files. Each OS has its own standard location for them. For example, if you're running Windows, then this new settings file was created at `C:\Users\<user>\AppData\Roaming\<project_title>\settings`.
 
