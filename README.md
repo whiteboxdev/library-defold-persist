@@ -66,11 +66,19 @@ When loading data, written data is prioritized over saved data. This means that 
 
 Creates a file with the specified data. If the file already exists, then its data can be overwritten.
 
+`file_name`: \<string>  
+`data`: \<table>  
+`overwrite`: \<bool>
+
 Returns `nil`.
 
 ### persist.write(file_name, key, value)
 
 Writes data to a file.
+
+`file_name`: \<string>  
+`key`: \<string>  
+`value`: \<any>
 
 Returns `nil`.
 
@@ -78,16 +86,23 @@ Returns `nil`.
 
 Flushes unsaved data from a file. If a key is specified, then only that field is flushed.
 
+`file_name`: \<string>  
+`key`: \<string>
+
 Returns `nil`.
 
 ### persist.save(file_name)
 
 Saves data that was written to a file.
 
+`file_name`: \<string>
+
 Returns `nil`.
 
 ### persist.load(file_name)
 
 Loads data from a file, including data that has not yet been saved.
+
+`file_name`: \<string>
 
 Returns a table, or `nil` if the file does not exist.
