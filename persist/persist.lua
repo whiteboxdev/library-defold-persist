@@ -30,11 +30,11 @@
 
 local persist = {}
 
--- Map file names to file paths to avoid redundantly constructing the same paths over and over.
+-- Maps file names to file paths to avoid redundantly constructing the same paths over and over.
 -- { <file_name> = <string>, ... }
 local file_paths = {}
 
--- Map file names to unsaved data fields.
+-- Maps file names to unsaved data fields.
 -- Upon saving a file, each unsaved field will replace its corresponding saved field.
 -- { <file_name> = { <string> = <table>, ... }, ... }
 local unsaved_data = {}
@@ -46,7 +46,7 @@ local unsaved_data = {}
 -- Sets the absolute path of a file in the OS's standard location for save files.
 -- Does not check if the file exists.
 -- `file_name`: <string>
--- Returns nil.
+-- Returns `nil`.
 local function set_file_path(file_name)
 	local project_title = sys.get_config_string("project.title")
 	file_paths[file_name] = sys.get_save_file(project_title, file_name)
@@ -56,7 +56,7 @@ end
 -- Does not check if the file exists.
 -- `file_name`: <string>
 -- `data`: <table>
--- Returns nil.
+-- Returns `nil`.
 local function save(file_name, data)
 	if sys.save(file_paths[file_name], data) then
 		unsaved_data[file_name] = nil
@@ -74,7 +74,7 @@ end
 -- `file_name`: <string>
 -- `data`: <table>
 -- `overwrite`: <bool>
--- Returns nil.
+-- Returns `nil`.
 function persist.create(file_name, data, overwrite)
 	if not file_paths[file_name] then
 		set_file_path(file_name)
@@ -89,7 +89,7 @@ end
 -- `file_name`: <string>
 -- `key`: <string>
 -- `value`: <any>
--- Returns nil.
+-- Returns `nil`.
 function persist.write(file_name, key, value)
 	if not file_paths[file_name] then
 		set_file_path(file_name)
@@ -108,7 +108,7 @@ end
 -- If a key is specified, then only that field is flushed.
 -- `file_name`: <string>
 -- `key`: <string>
--- Returns nil.
+-- Returns `nil`.
 function persist.flush(file_name, key)
 	if not file_paths[file_name] then
 		set_file_path(file_name)
@@ -128,7 +128,7 @@ end
 
 -- Saves data that was written to a file.
 -- `file_name`: <string>
--- Returns nil.
+-- Returns `nil`.
 function persist.save(file_name)
 	if not file_paths[file_name] then
 		set_file_path(file_name)
@@ -143,7 +143,7 @@ end
 
 -- Loads data from a file, including data that has not yet been saved.
 -- `file_name`: <string>
--- Returns a table, or nil if the file does not exist.
+-- Returns a table, or `nil` if the file does not exist.
 function persist.load(file_name)
 	if not file_paths[file_name] then
 		set_file_path(file_name)
