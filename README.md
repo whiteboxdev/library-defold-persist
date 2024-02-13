@@ -33,7 +33,7 @@ If the settings file already exists, then `persist.create()` will simply be igno
 
 Each OS has its own conventions and preferences for where applications should create custom files. See the following list for details:
 
-* Windows: C:\Users\<user>\AppData\Roaming\<project_title>\<file_name>
+* Windows: C:\\Users\\\<user>\\AppData\\Roaming\\\<project_title>\\\<file_name>
 * MacOS: ~/Library/Application Support/<project_title>/<file_name>
 * (Please add a pull request for other platforms!)
 
