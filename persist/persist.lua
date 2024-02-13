@@ -31,32 +31,27 @@
 local persist = {}
 
 -- Maps file names to file paths to avoid redundantly constructing the same paths over and over.
--- { <file_name> = <string>, ... }
+-- { <file_name> = <file_path>, ... }
 local file_paths = {}
 
 -- Maps file names to unsaved data fields.
 -- Upon saving a file, each unsaved field will replace its corresponding saved field.
--- { <file_name> = { <string> = <table>, ... }, ... }
+-- { <file_name> = { <key> = <value>, ... }, ... }
 local unsaved_data = {}
 
 --------------------------------------------------------------------------------
 -- Local Functions
 --------------------------------------------------------------------------------
 
--- Sets the absolute path of a file in the OS's standard location for save files.
+-- Caches the absolute path of a file.
 -- Does not check if the file exists.
--- `file_name`: <string>
--- Returns `nil`.
-local function set_file_path(file_name)
+local function cache_file_path(file_name)
 	local project_title = sys.get_config_string("project.title")
 	file_paths[file_name] = sys.get_save_file(project_title, file_name)
 end
 
 -- Saves data that was written to a file.
 -- Does not check if the file exists.
--- `file_name`: <string>
--- `data`: <table>
--- Returns `nil`.
 local function save(file_name, data)
 	if sys.save(file_paths[file_name], data) then
 		unsaved_data[file_name] = nil
@@ -71,30 +66,16 @@ end
 
 -- Creates a file with the specified data.
 -- If the file already exists, then its data can be overwritten.
--- `file_name`: <string>
--- `data`: <table>
--- `overwrite`: <bool>
--- Returns `nil`.
 function persist.create(file_name, data, overwrite)
-	if not file_paths[file_name] then
-		set_file_path(file_name)
-	end
-	if not sys.exists(file_paths[file_name]) or overwrite then
+	if not persist.exists(file_name) or overwrite then
 		unsaved_data[file_name] = data
 		save(file_name, data)
 	end
 end
 
 -- Writes data to a file.
--- `file_name`: <string>
--- `key`: <string>
--- `value`: <any>
--- Returns `nil`.
 function persist.write(file_name, key, value)
-	if not file_paths[file_name] then
-		set_file_path(file_name)
-	end
-	if not sys.exists(file_paths[file_name]) then
+	if not persist.exists(file_name) then
 		print("Defold Persist: persist.write() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
@@ -106,14 +87,8 @@ end
 
 -- Flushes unsaved data from a file.
 -- If a key is specified, then only that field is flushed.
--- `file_name`: <string>
--- `key`: <string>
--- Returns `nil`.
 function persist.flush(file_name, key)
-	if not file_paths[file_name] then
-		set_file_path(file_name)
-	end
-	if not sys.exists(file_paths[file_name]) then
+	if not persist.exists(file_name) then
 		print("Defold Persist: persist.flush() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
@@ -127,13 +102,8 @@ function persist.flush(file_name, key)
 end
 
 -- Saves data that was written to a file.
--- `file_name`: <string>
--- Returns `nil`.
 function persist.save(file_name)
-	if not file_paths[file_name] then
-		set_file_path(file_name)
-	end
-	if not sys.exists(file_paths[file_name]) then
+	if not persist.exists(file_name) then
 		print("Defold Persist: persist.save() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
@@ -142,13 +112,8 @@ function persist.save(file_name)
 end
 
 -- Loads data from a file, including data that has not yet been saved.
--- `file_name`: <string>
--- Returns a table, or `nil` if the file does not exist.
 function persist.load(file_name)
-	if not file_paths[file_name] then
-		set_file_path(file_name)
-	end
-	if not sys.exists(file_paths[file_name]) then
+	if not persist.exists(file_name) then
 		print("Defold Persist: persist.load() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
@@ -158,6 +123,15 @@ function persist.load(file_name)
 		saved_data[key] = value
 	end
 	return saved_data
+end
+
+-- Checks if a file exists.
+function persist.exists(file_name)
+	if file_paths[file_name] then
+		return sys.exists(file_paths[file_name])
+	end
+	cache_file_path(file_name)
+	return sys.exists(file_paths[file_name])
 end
 
 return persist

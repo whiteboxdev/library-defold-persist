@@ -29,9 +29,13 @@ local default_settings_data =
 persist.create("settings", default_settings_data)
 ```
 
-If the settings file already existed, then the call to `persist.create()` would simply be ignored. This function should be called as part of a project's startup routine for each save file to ensure that they exist.
+If the settings file already exists, then `persist.create()` will simply be ignored. This function should be called as part of a project's startup routine for each file to ensure that it exists.
 
-Persist only concerns itself with save files. Each OS has its own standard location for them. For example, if you're running Windows, then this new settings file was created at `C:\Users\<user>\AppData\Roaming\<project_title>\settings`.
+Each OS has its own conventions and preferences for where applications should create custom files. See the following list for details:
+
+* Windows: C:\Users\<user>\AppData\Roaming\<project_title>\<file_name>
+* MacOS: ~/Library/Application Support/<project_title>/<file_name>
+* (Please add a pull request for other platforms!)
 
 Let's change the music volume from 100 to 75, and change the sound volume from 100 to 25:
 
@@ -40,9 +44,9 @@ persist.write("settings", "music_volume", 75)
 persist.write("settings", "sound_volume", 25)
 ```
 
-Persist keeps track of which data is *saved* and which data is *written*. Written data has not yet been transferred to non-volatile storage. It only exists as a table within the running process. This allows us to abort file changes before they overwrite previously-saved data.
+Persist keeps track of which data is *saved* and which data is *written*. Written data has not yet been transferred to non-volatile storage. It only exists as a table within the running process. This allows us to abort file changes before they overwrite previously saved data.
 
-Let's revert back to whatever the sound volume used to be before we changed it, then save our changes:
+Let's revert back to whatever the sound volume was before we changed it, then save our changes:
 
 ```
 persist.flush("settings", "sound_volume")
@@ -58,51 +62,30 @@ local music_volume = settings_data.music_volume
 sound.play(msg.url(nil, nil, "background_music"), { gain = master_volume * music_volume })
 ```
 
-When loading data, written data is prioritized over saved data. This means that calling `persist.load()` will always return the latest version of a file, even if it has not yet been saved.
+When loading data, written data is prioritized over saved data. This means that `persist.load()` will always return the latest version of a file, even if it has not yet been saved.
 
 ## API
 
-### persist.create(file_name, data, overwrite)
+### persist.create(file_name, data [, overwrite])
 
 Creates a file with the specified data. If the file already exists, then its data can be overwritten.
-
-`file_name`: \<string>  
-`data`: \<table>  
-`overwrite`: \<bool>
-
-Returns `nil`.
 
 ### persist.write(file_name, key, value)
 
 Writes data to a file.
 
-`file_name`: \<string>  
-`key`: \<string>  
-`value`: \<any>
-
-Returns `nil`.
-
-### persist.flush(file_name, key)
+### persist.flush(file_name [, key])
 
 Flushes unsaved data from a file. If a key is specified, then only that field is flushed.
-
-`file_name`: \<string>  
-`key`: \<string>
-
-Returns `nil`.
 
 ### persist.save(file_name)
 
 Saves data that was written to a file.
 
-`file_name`: \<string>
-
-Returns `nil`.
-
 ### persist.load(file_name)
 
 Loads data from a file, including data that has not yet been saved.
 
-`file_name`: \<string>
+### persist.exists(file_name)
 
-Returns a table, or `nil` if the file does not exist.
+Checks if a file exists.
