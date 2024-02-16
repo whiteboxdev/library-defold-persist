@@ -33,11 +33,13 @@ persist.create("settings", default_settings_data)
 
 If the settings file already exists, then `persist.create()` will simply be ignored. This function should be called as part of a project's startup routine for each file to ensure that it exists.
 
-Each OS has its own conventions and preferences for where applications should create custom files. See the following list for details:
+Each OS has its own conventions and preferences for where applications should create custom files. See the following table for details:
 
-* Windows: *C:\\Users\\\<user>\\AppData\\Roaming\\\<project_title>\\\<file_name>*
-* MacOS: *~/Library/Application Support/<project_title>/<file_name>*
-* (Please submit a pull request for other platforms!)
+| OS | Path |
+| -- | ---- |
+| Windows | C:\\Users\\\<user>\\AppData\\Roaming\\\<project_title>\\\<file_name> |
+| MacOS | ~/Library/Application Support/<project_title>/<file_name> |
+| (Other Platforms) | (Please submit a pull request!) |
 
 Let's change the music volume from 100 to 75, and change the sound volume from 100 to 25:
 
