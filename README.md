@@ -11,7 +11,7 @@ Please click the ☆ button on GitHub if this repository is useful or interestin
 Add the latest version to your project's dependencies:  
 https://github.com/klaytonkowalski/library-defold-persist/archive/main.zip
 
-## Usage
+## Tutorial
 
 Import Persist into script files that need to save or load data:
 
