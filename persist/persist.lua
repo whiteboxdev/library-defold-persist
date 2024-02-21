@@ -47,7 +47,14 @@ local unsaved_data = {}
 -- Does not check if the file exists.
 local function cache_file_path(file_name)
 	local project_title = sys.get_config_string("project.title")
-	file_paths[file_name] = sys.get_save_file(project_title, file_name)
+	local system_info = sys.get_sys_info()
+	if system_info.system_name == "Linux" then
+		-- Replaces "/home/<user>/.<project_title>/<file_name>" with "/home/<user>/.<config>/<project_title>/<file_name>".
+		local config = os.getenv("XDG_CONFIG_HOME") or "config/"
+		file_paths[file_name] = sys.get_save_file(config .. project_title, file_name)
+	else
+		file_paths[file_name] = sys.get_save_file(project_title, file_name)
+	end
 end
 
 -- Saves data that was written to a file.
