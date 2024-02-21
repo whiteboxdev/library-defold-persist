@@ -35,11 +35,12 @@ If the settings file already exists, then `persist.create()` will simply be igno
 
 Each OS has its own conventions and preferences for where applications should create custom files. See the following table for details:
 
-| OS | Path |
-| -- | ---- |
-| Windows | C:\\Users\\\<user>\\AppData\\Roaming\\\<project_title>\\\<file_name> |
-| MacOS | ~/Library/Application Support/<project_title>/<file_name> |
-| (Other Platforms) | (Please submit a pull request!) |
+| OS | Path | More |
+| -- | ---- | ---- |
+| Windows | *C:\\Users\\\<user>\\AppData\\Roaming\\\<project_title>\\\<file_name>* | |
+| MacOS | *~/Library/Application Support/\<project_title>/\<file_name>* | |
+| Linux | *\<config>/\<project_title>/\<file_name>* | The *config* variable adopts the contents of the *XDG_CONFIG_HOME* environment variable, otherwise it defaults to *~/.config*. |
+| (Other Platforms) | (Please submit a pull request!) | |
 
 Let's change the music volume from 100 to 75, and change the sound volume from 100 to 25:
 
