@@ -49,9 +49,14 @@ local function cache_file_path(file_name)
 	local project_title = sys.get_config_string("project.title")
 	local system_info = sys.get_sys_info()
 	if system_info.system_name == "Linux" then
-		-- Replaces "/home/<user>/.<project_title>/<file_name>" with "/home/<user>/.<config>/<project_title>/<file_name>".
-		local config = os.getenv("XDG_CONFIG_HOME") or "config/"
-		file_paths[file_name] = sys.get_save_file(config .. project_title, file_name)
+		local xdg_config_home = os.getenv("XDG_CONFIG_HOME")
+		if xdg_config_home then
+			-- Use $XDG_CONFIG_HOME as the base config folder if the user has set it
+			file_paths[file_name] = ("%s/%s/%s"):format(xdg_config_home, project_title, file_name)
+		else
+			-- Otherwise, trick Defold into using the .config folder instead of the user's home folder
+			file_paths[file_name] = sys.get_save_file("config/" .. project_title, file_name)
+		end
 	else
 		file_paths[file_name] = sys.get_save_file(project_title, file_name)
 	end
