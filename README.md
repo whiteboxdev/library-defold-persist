@@ -19,7 +19,7 @@ Import Persist into script files that need to save or load data:
 local persist = require "persist.persist"
 ```
 
-A file must exist before it can be accessed, otherwise an error message will be printed to standard output. Let's create a settings file:
+A file must exist before it can be accessed, otherwise an error message will be printed to standard output. Let's create a *settings* file:
 
 ```
 local default_settings_data =
@@ -31,7 +31,7 @@ local default_settings_data =
 persist.create("settings", default_settings_data)
 ```
 
-If the settings file already exists, then `persist.create()` will simply be ignored. This function should be called as part of a project's startup routine for each file to ensure that it exists.
+If the file already exists, then `persist.create()` will simply be ignored. This function should be called as part of a project's startup routine for each file to ensure that it exists.
 
 Each OS has its own conventions and preferences for where applications should create custom files. See the following table for details:
 
@@ -49,7 +49,7 @@ persist.write("settings", "music_volume", 75)
 persist.write("settings", "sound_volume", 25)
 ```
 
-Persist keeps track of which data is *saved* and which data is *written*. Written data has not yet been transferred to non-volatile storage. It only exists as a table within the running process. This allows us to abort file changes before they overwrite previously saved data.
+Persist differentiates between **saved data** and **written data**. Written data has not yet been transferred to non-volatile memory. It only exists as a table within the running process. This allows us to abort file changes before they overwrite previously saved data.
 
 Let's revert back to whatever the sound volume was before we changed it, then save our changes:
 
@@ -58,7 +58,7 @@ persist.flush("settings", "sound_volume")
 persist.save("settings")
 ```
 
-Next let's load the settings data so that we know how loudly to play our wonderful background music:
+Next let's load the data from the *settings* file so that we know how loudly to play our wonderful background music:
 
 ```
 local settings_data = persist.load("settings")
@@ -68,6 +68,8 @@ sound.play(msg.url(nil, nil, "background_music"), { gain = master_volume * music
 ```
 
 When loading data, written data is prioritized over saved data. This means that `persist.load()` will always return the latest version of a file, even if it has not yet been saved.
+
+If a file has the ".json" extension, then its data will be saved and loaded as JSON instead of Defold's built-in format.
 
 ## API
 
@@ -89,7 +91,7 @@ Saves data that was written to a file.
 
 ### persist.load(file_name)
 
-Loads data from a file, including data that has not yet been saved.
+Loads data from a file, including written data.
 
 ### persist.exists(file_name)
 

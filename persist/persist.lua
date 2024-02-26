@@ -44,17 +44,16 @@ local unsaved_data = {}
 --------------------------------------------------------------------------------
 
 -- Caches the absolute path of a file.
--- Does not check if the file exists.
 local function cache_file_path(file_name)
 	local project_title = sys.get_config_string("project.title")
 	local system_info = sys.get_sys_info()
 	if system_info.system_name == "Linux" then
+		-- Linux uses the $XDG_CONFIG_HOME environment variable as the file path prefix.
+		-- If this variable is not set, then we default to the conventional "~/.config/" prefix.
 		local xdg_config_home = os.getenv("XDG_CONFIG_HOME")
 		if xdg_config_home then
-			-- Use $XDG_CONFIG_HOME as the base config folder if the user has set it
-			file_paths[file_name] = ("%s/%s/%s"):format(xdg_config_home, project_title, file_name)
+			file_paths[file_name] = string.format("%s/%s/%s", xdg_config_home, project_title, file_name)
 		else
-			-- Otherwise, trick Defold into using the .config folder instead of the user's home folder
 			file_paths[file_name] = sys.get_save_file("config/" .. project_title, file_name)
 		end
 	else
@@ -62,13 +61,30 @@ local function cache_file_path(file_name)
 	end
 end
 
+-- Checks if a file has the ".json" extension.
+local function is_json_file(file_name)
+	return string.sub(file_paths[file_name], -5) == ".json"
+end
+
 -- Saves data that was written to a file.
--- Does not check if the file exists.
 local function save(file_name, data)
-	if sys.save(file_paths[file_name], data) then
-		unsaved_data[file_name] = nil
+	-- If this is a JSON file, then save it using Lua's `io` API.
+	if is_json_file(file_name) then
+		local file_handle = io.open(file_paths[file_name], "w")
+		if file_handle then
+			local file_text = json.encode(data)
+			file_handle:write(file_text)
+			file_handle:close()
+		else
+			print("Defold Persist: save() -> Failed to open file: " .. file_paths[file_name])
+		end
+	-- If this is a non-JSON file, then save it using Defold's `sys` API.
 	else
-		print("Defold Persist: save() -> Failed to save data: " .. file_path)
+		if sys.save(file_paths[file_name], data) then
+			unsaved_data[file_name] = nil
+		else
+			print("Defold Persist: save() -> Failed to save file: " .. file_paths[file_name])
+		end
 	end
 end
 
@@ -123,13 +139,28 @@ function persist.save(file_name)
 	save(file_name, data)
 end
 
--- Loads data from a file, including data that has not yet been saved.
+-- Loads data from a file, including written data.
 function persist.load(file_name)
 	if not persist.exists(file_name) then
 		print("Defold Persist: persist.load() -> File does not exist: " .. file_paths[file_name])
 		return
 	end
-	local saved_data = sys.load(file_paths[file_name]) or {}
+	local saved_data
+	-- If this is a JSON file, then load it using Lua's `io` API.
+	if is_json_file(file_name) then
+		local file_handle = io.open(file_paths[file_name], "r")
+		if file_handle then
+			local file_text = file_handle:read("*all")
+			file_handle:close()
+			saved_data = json.decode(file_text)
+		else
+			print("Defold Persist: persist.load() -> Failed to open file: " .. file_paths[file_name])
+		end
+	-- If this is a non-JSON file, then load it using Defold's `sys` API.
+	else
+		saved_data = sys.load(file_paths[file_name]) or {}
+	end
+	-- Overwrite loaded data with any written data.
 	local unsaved_data = unsaved_data[file_name] or {}
 	for key, value in pairs(unsaved_data) do
 		saved_data[key] = value
