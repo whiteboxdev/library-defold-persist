@@ -59,16 +59,16 @@ function init()
 	{
 		click_count = 0
 	}
-	persist.create("profile", profile_data, false)
+	persist.create("profile.json", profile_data, false)
 	-- Load the click count.
-	click_count = persist.load("profile").click_count
+	click_count = persist.load("profile.json").click_count
 	label.set_text(msg.url(nil, go_label, "label"), click_count)
 end
 
 function final()
 	-- On application shutdown, write the updated click count to the file, then save the changes.
-	persist.write("profile", "click_count", click_count)
-	persist.save("profile")
+	persist.write("profile.json", "click_count", click_count)
+	persist.save("profile.json")
 end
 
 function on_input(self, action_id, action)

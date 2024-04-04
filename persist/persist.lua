@@ -66,6 +66,11 @@ local function is_json_file(file_name)
 	return string.sub(file_paths[file_name], -5) == ".json"
 end
 
+-- Checks if an entry in a JSON file should be converted from a string to a hash.
+local function is_json_hash(str)
+	return string.match(str, "hash: %[.*%]")
+end
+
 -- Saves data that was written to a file.
 local function save(file_name, data)
 	-- If this is a JSON file, then save it using Lua's `io` API.
@@ -153,6 +158,13 @@ function persist.load(file_name)
 			local file_text = file_handle:read("*all")
 			file_handle:close()
 			saved_data = json.decode(file_text)
+			-- Hashes are converted to strings when saved as JSON.
+			-- Revert these strings back to hashes.
+			for key, value in pairs(saved_data) do
+				if type(value) == "string" and is_json_hash(value) then
+					saved_data[key] = hash(string.match(value, "hash: %[(.*)%]"))
+				end
+			end
 		else
 			print("Defold Persist: persist.load() -> Failed to open file: " .. file_paths[file_name])
 		end
