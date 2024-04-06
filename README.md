@@ -33,6 +33,8 @@ persist.create("settings", default_settings_data)
 
 If the file already exists, then `persist.create()` will simply be ignored. This function should be called as part of a project's startup routine for each file to ensure that it exists.
 
+If the file has the ".json" extension, then its data will be saved as JSON instead of Defold's built-in format. Be cautious to only save data types that are supported by Defold's `json` API. For example, the hashed string `hash("test")` cannot be encoded or decoded properly, so it should instead be saved as just `"test"` then manually hashed.
+
 Each OS has its own conventions and preferences for where applications should create custom files. See the following table for details:
 
 | OS | Path | More |
@@ -68,8 +70,6 @@ sound.play(msg.url(nil, nil, "background_music"), { gain = master_volume * music
 ```
 
 When loading data, written data is prioritized over saved data. This means that `persist.load()` will always return the latest version of a file, even if it has not yet been saved.
-
-If a file has the ".json" extension, then its data will be saved and loaded as JSON instead of Defold's built-in format.
 
 ## API
 
