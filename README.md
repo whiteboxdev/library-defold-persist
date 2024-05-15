@@ -4,12 +4,12 @@ Defold Persist provides a simple interface for saving and loading data in a Defo
 
 Please click the ☆ button on GitHub if this repository is useful or interesting. Thank you!
 
-![thumbnail.png](https://github.com/klaytonkowalski/library-defold-persist/blob/main/assets/images/thumbnail.png?raw=true)
+![thumbnail.png](https://github.com/whiteboxdev/library-defold-persist/blob/main/assets/images/thumbnail.png?raw=true)
 
 ## Installation
 
 Add the latest version to your project's dependencies:  
-https://github.com/klaytonkowalski/library-defold-persist/archive/main.zip
+https://github.com/whiteboxdev/library-defold-persist/archive/main.zip
 
 ## Tutorial
 
