@@ -1,6 +1,6 @@
 # Defold Persist
 
-**Note: I'm no longer active on this account, and therefore will not be maintaining or contributing to this project in the future. Please try the improved [Checkpoint](https://github.com/Klaleus/defold-checkpoint) library instead.**
+**Note: I'm no longer active on this account, and therefore will not be maintaining or contributing to this project in the future. Please try the improved [Checkpoint](https://codeberg.org/Klaleus/defold-checkpoint) library instead.**
 
 Defold Persist provides a simple interface for saving and loading data in a Defold game engine project.
 
